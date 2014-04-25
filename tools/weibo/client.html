@@ -1,0 +1,339 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0, width=device-width, user-scalable=no"/>
+	<style type="text/css">
+	body{font-family:monaco;font-size:12px;margin:0;padding:0;font-family:"微软雅黑",Arial;width:100%;}
+	.green{color:green;}
+	.red{color:red;}
+	.none{display:none;}
+	.menu{height:30px;line-height:30px;background:-webkit-gradient(linear, left top, left bottom, from(#8BC4EB), to(#58A5DE));position:relative;}
+	.menu_left_user{text-decoration:none;color:#fff;font-size:14px;margin-left:5px;}
+	.menu_right{position:absolute;top:0;right:5px;line-height:30px;}
+	.menu .button{margin:0 0 0 3px;}
+	.api_list,.api_list_dt,.api_list_dd{margin:0;padding:0;-webkit-user-select:none;}
+	.api_list_num{color:green;margin-left:6px;}
+	.api_list_dt{height:38px;line-height:38px;background:#efefef;border:1px solid #ccc;border-width:0 0 1px;padding:0 5px;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+	.api_list_dd{background:#fff;padding:0 5px 5px 15px;border-bottom:1px solid #ccc;position:relative;overflow:hidden;}
+	.api_list_ch{margin:5px 0 0;padding:0;font-size:14px;}
+	.api_list_dd .button{position:absolute;top:10px;right:10px;}
+	.api_result{font-size:12px;overflow:hidden;padding-top:1px;margin:5px 0;}
+	.table-th,.table-td{line-height:20px;float:left;border:1px solid #ccc;margin:-1px -1px 0 0;padding:5px;overflow:hidden;white-space:nowrap;-webkit-text-size-adjust:none;font-size:10px;}
+	.table-th{color:#090;background:#efe;}
+	.table-th1,.table-td1{width:50px;clear:both;}
+	.table-th2,.table-td2{width:140px;text-overflow:ellipsis;}
+	.table-th3,.table-td3{width:50px;}
+	.table-footer{clear:both;margin:5px 0 0;text-align:center;}
+	input[type="submit"],input[type="reset"],input[type="button"],.button{
+		background-color:#F4F9FC;
+		font-size:12px;
+		padding:3px 7px;
+		background:-webkit-gradient(linear, left top, left bottom, from(#F4F9FC), to(#E0EFFB));
+		-webkit-border-radius:3px;
+		border-radius:3px;
+		border:1px solid #7DB6D8;
+		color:#2473A2;
+		cursor:pointer;
+		text-decoration:none;
+		display:inline-block;
+		line-height:18px;
+	}
+	</style>
+	<script>var common={};</script>
+	<script src="http://test.open.t.qq.com/controller.php?action=api_config&type=opent"></script>
+</head>
+<body>
+	<div class="menu">
+		<div class="menu_left" id="menu_left"></div>
+		<div class="menu_right" id="menu_right">
+		</div>
+	</div>
+	<dl class="api_list" id="api_list"></dl>
+	<!--
+	<div><a href="javascript:void(0)" onclick="mrun()" style="font-size:40px;">run</a></div>
+	<div><a href="javascript:void(0)" onclick="runApi('t/add', {}, 'json', 'post')" style="font-size:40px;">run_(t/add)</a></div>
+	<div><a href="javascript:void(0)" onclick="runApi('user/info', {}, 'json', 'get')" style="font-size:40px;">run_(user/info)</a></div>
+	<div><a href="javascript:void(0)" onclick="runApi('t/add_pic_url', {}, 'json', 'get')" style="font-size:40px;">run_(t/add_pic_url)</a></div>
+	<div id="statistics"></div>
+	<hr/>
+	<div id="log"></div>​-->
+    <script type="text/javascript" src="http://mat1.gtimg.com/app/openjs/openjs.js"></script>
+	<script type="text/javascript">
+		function showUserInfo(u){
+			var ml = document.getElementById("menu_left")
+			   ,mr = document.getElementById("menu_right");
+			if (u){
+				ml.innerHTML = '<a href="http://t.qq.com/'+u.name+'" target="_blank" class="menu_left_user">'+u.nick+'</a>';
+				mr.innerHTML = '<a href="javascript:;" onclick="config();" class="button">设置</a> <a href="javascript:void(0)" onclick="logout()" class="button">取消授权</a>';
+			}else{
+				ml.innerHTML = '';
+				mr.innerHTML = '<a href="javascript:;" onclick="login();" class="button">授权</a>';;
+			}
+		}
+		
+		(function showApiList(list){
+			var s=[],o=document.getElementById("api_list");
+				list.sort(function(v1,v2){
+					return v2.list.length-v1.list.length;
+				});
+			for (var i=0,k=list.length;i<k;i++){
+				var api = list[i];
+				s.push('<dt class="api_list_dt" onclick="showChildList(this);">'+api.name+'<span class="api_list_num">('+api.list.length+')</span></dt>');
+				for (var j=0,jj=api.list.length;j<jj;j++){
+					var a = api.list[j];
+					s.push('<dd class="api_list_dd none"><h3 class="api_list_ch">'+a.api_name+'</h3><div>'+(api.baseURI+'/'+a.api_url)+'</div><a href="javascript:;" class="button" onclick="testApi(this,\''+(api.baseURI+'/'+a.api_url)+'\');">测试</a></dd>');
+				}
+			}
+			o.innerHTML = s.join("\n");
+		})(common.api);
+		
+		function showChildList(o){
+			var p=o.nextElementSibling,tag = (p.className.search(/\bnone\b/)>-1),i=0;
+			while(p){
+				if (p && p.tagName.toLowerCase() === "dd"){
+					if (tag){
+						p.className = p.className.replace(/\bnone\b/g,"");
+					}else{
+						p.className = p.className+" none";
+					}
+				}else{
+					p = null;
+					break;
+				}
+				p = p.nextElementSibling;
+				i++;		
+			}
+		}
+		
+		function config(){
+			var k = prompt("请输入需要循环调用的次数",10);
+			if (k === null){
+				return;
+			}
+			if (/^[1-9]\d{0,2}$/.test(k)){
+				window.configTimes = parseInt(k);
+			}else{
+				alert("请输入一个1-999之间的数值");
+			}
+		}
+		
+		function testApi(o,path){
+			if (!T.loginStatus()){
+				alert("您还没有对本程序进行授权");
+			}else{
+				var p = path.split("/"),api_list = common.api;
+				for(var i=0,k=api_list.length;i<k;i++){
+					if (api_list[i].baseURI === p[0]){
+						for (var j=0,list=api_list[i].list,jj=list.length;j<jj;j++){
+							console.log([list[j].api_url, p[1],list[j].api_url === p[1]]);
+							if (list[j].api_url === p[1]){/*
+								T.api([api_list[i].baseURI,list[j].api_url].join("/"),list[j].paras,list[j].paras.format,list[j].method)
+								.success(function (response) {
+							          alert(response);
+								})
+								.error(function (code, message) {
+								});
+								break;
+								*/
+								window.run([api_list[i].baseURI,list[j].api_url].join("/"),list[j].paras,"json"/*list[j].paras.format*/,list[j].method,o);
+							}
+						}
+						break;
+					}
+				}
+				//alert("找不到此API的配置信息");
+			}
+		}
+		
+		function mrun() {
+			    T.login(window.userinfo);
+			    return false;
+		};
+
+		
+		function runApi(a,b,c,d)
+		{
+					window.run(a,b,c,d);
+					return false;
+		}
+		
+		function login()
+		{
+				T.login(function(u){console.log(u);
+					showUserInfo(u);	
+				});
+		}
+		function logout()
+		{
+				T.logout(function(){
+					showUserInfo();
+				});
+		}
+
+		function getParam(a)
+		{
+			switch(a){
+				case "t/add":
+					return {content:'test '+ Math.random(), clientip:'123.123.123.123'};
+					break;
+				case "user/info":
+					return {};
+					break;
+				case "t/add_pic_url":
+					return {content:'test '+ Math.random(), pic:'http://t2.qpic.cn/mblogpic/9c7e34358608bb61a696/2000',clientip:'123.123.123.123'};
+					break;
+				default:
+					return null;	
+				}
+		}
+
+	window.run = function (a,b,c,d,e) {
+	
+    // main code
+    var repeatTimes = window.configTimes || 10; // total times to repeat
+    
+    var count = 0;
+    var successCount = 0;
+    var failCount = 0;
+    var successTimeTotal = 0;
+    var log = function(e){
+    	var en = e.nextElementSibling;
+    	if (en){
+    		return en;
+    	}else{
+    		en = document.createElement("form");
+    		en.className = "api_result";
+    		en.method = "post";
+    		en.target = "_blank";
+    		en.onsubmit = function(){
+    			var f = this,D = new Date(),t = [D.getFullYear(),D.getMonth()+1,D.getDate()].join("/");console.log([f["subject"],f["body"]]);
+    			f["subject"].value = "腾讯微博API移动端终调用速度测试结果 "+t;
+    			f["to"].value = (window.configEmail || "xiefucai@foxmail.com");
+    			for (var i=0,doms=f.getElementsByTagName("div"),s="",k=doms.length;i<k;i++){
+    				var d=doms[i],c=d.className.replace(/table-/g,"");
+    				if (/\btd1\b/.test(c)){
+    					if (/\bred\b/.test(c)){
+    						s+="<tr style=color:red><td>"+d.innerHTML+"</td>";
+    					}else{
+    						s+="<tr><td>"+d.innerHTML+"</td>";
+    					}
+    				}else if(/\btd3\b/.test(c)){
+    					s+="<td>"+d.innerHTML+"</td></tr>";
+    				}else if(/\btd\b/.test(c)){
+    					s+="<td>"+d.innerHTML+"</td>";
+    				}else if (/\bth1\b/.test(c)){
+    					if (/\bred\b/.test(c)){
+    						s+="<tr style=color:red bgColor=#eeffee><td>"+d.innerHTML+"</td>";
+    					}else{
+    						s+="<tr bgColor=#eeffee><td>"+d.innerHTML+"</td>";
+    					}
+    				}else if(/\bth3\b/.test(c)){
+    					s+="<th>"+d.innerHTML+"</th></tr>";
+    				}else if(/\bth\b/.test(c)){
+    					s+="<th>"+d.innerHTML+"</th>";
+    				}
+    			}
+    			s = "<table style=border-collapse:collapse;font-size:2px; border=1 cellpadding=7>"+s+"</table>";
+    			console.log(s)
+    			s = s.replace(/\\\"/g,"\"");console.log(s)
+    			f["body"].value = "<h1 style=font-size:14px;margin-bottom:15px;>API名称："+a+"</h1>"+s+"<div style=font-size:10px;><a href="+location.href+" target=_blank>"+location.href+"</a>";
+    					 
+    			f.action = "http://www.webshowme.com/04js/email.php";
+    			f.submit();
+    			return false;
+    		}
+    		e.parentNode.appendChild(en);
+    		return en;
+    	}
+    }(e);
+    var statistics = document.getElementById('statistics');
+    var startTime = new Date();
+    
+    log.innerHTML = '<div class="table-th table-th1">返回结果</div><div class="table-th table-th2">请求耗时</div><div class="table-th table-th3">结果</div>';
+    function sample () {
+        count ++;
+        if (count > repeatTimes) {
+            return;
+		}
+       
+		var ob = getParam(a) || b; 
+		T.api(a, ob, c, d)       
+        .success(function (data,responsetime) {
+            successCount ++;
+            successTimeTotal += responsetime;
+            log.innerHTML += '<div class="table-td table-td1 green">成功</div><div class="table-td table-td2">'+responsetime + 'ms</div><div class="table-td table-td3">'+JSON.stringify(data).length + '字节</div>';
+        })
+        .error(function (code, message) {
+            failCount ++;
+            log.innerHTML += '<div class="table-td table-td1 red">失败</div><div class="table-td table-td2">'+message+'</div><div class="table-td table-td3">'+code+'</div>';
+        })
+        .complete(function () {
+            if (count == repeatTimes) {
+                //statistics.innerHTML = "complete " + repeatTimes + ' samples in ' + (new Date() - startTime) + ' ms <br/> ' + successCount + ' success, ' + failCount + ' fail <br/> average success response time is <span class="green">' + Math.floor(successTimeTotal/successCount) + ' ms</span>' ;
+                //log.innerHTML+="</table>";
+                log.innerHTML += '<div class="table-th table-th1">调用次数</div><div class="table-th table-th2">共耗时</div><div class="table-th table-th3">平均耗时</div><div class="table-td table-td1">'+repeatTimes+'</div><div class="table-td table-td2">'+(new Date() - startTime)+'ms</div><div class="table-td table-td3">'+Math.floor(successTimeTotal/successCount)+'ms</div><a href="javascript:;" onclick="var o=this.parentNode;o.parentNode.removeChild(o);" class="button">清除结果</a><div class="table-footer"><input type="hidden" name="to"/><input type="hidden" name="subject"/><textarea name="body" style="display:none"></textarea><input type="submit" value="发送到邮箱"/></div>';
+            }
+            sample();
+        })
+        //statistics.innerHTML = 'running sample ' + count + ' of ' + repeatTimes;
+    };
+           
+    sample(); 
+    
+	}
+	
+	window.userinfo = function () {
+    //T.logout();
+    // main code
+    var repeatTimes = 10; // total times to repeat
+    
+    var count = 0;
+    var successCount = 0;
+    var failCount = 0;
+    var successTimeTotal = 0;
+    var log = document.getElementById('log');
+    var statistics = document.getElementById('statistics');
+    var startTime = new Date();
+    
+    log.innerHTML = "";
+    function sample () {
+        count ++;
+        if (count > repeatTimes) {
+            return;
+        }
+        T.api('user/info')
+        .success(function (data,responsetime) {
+            successCount ++;
+            successTimeTotal += responsetime;
+            log.innerHTML += responsetime + 'ms <span class="green">√</span><br/>';
+        })
+        .error(function (code, message) {
+            failCount ++;
+            log.innerHTML += message+ ' <span class="red">X</span><br/>';
+        })
+        .complete(function () {
+            if (count == repeatTimes) {
+                statistics.innerHTML = "complete " + repeatTimes + ' samples in ' + (new Date() - startTime) + ' ms <br/> ' + successCount + ' success, ' + failCount + ' fail <br/> average success response time is <span class="green">' + Math.floor(successTimeTotal/successCount) + ' ms</span>' ;
+            }
+            sample();
+        })
+        statistics.innerHTML = 'running sample ' + count + ' of ' + repeatTimes;
+    };
+           
+    sample(); 
+    
+	}
+
+
+	T.init({appkey:801072707});
+    
+	T.ready(function () {
+	var ml= document.getElementById('menu_left'),mr = document.getElementById("menu_right"),u=T.loginStatus();
+    showUserInfo(u);
+  });
+ 
+</script>
+</body>
+</html>
+<!--[if !IE]>|xGv00|0e1afec47c685077e9335f243fb7fd71<![endif]-->

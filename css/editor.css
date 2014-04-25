@@ -1,0 +1,12 @@
+html{overflow:hidden;overflow-y:auto;}
+body{font-size:14px;line-height:1.75;color:#545454;word-wrap:break-word;word-break:break-all;margin:10px 0;overflow-y:auto;_ margin:0;}
+pre{word-wrap:break-word;word-break:break-all;border:1px dotted #999;background:#fefefe;padding:0 5px;font-family:Verdana;padding:5px;font-size:10px;}
+h4{color:#090;}
+p{word-wrap:break-word;word-break:break-all;line-height:1.5;}
+body>*{margin:auto 10px;}
+.paratable{border:2px solid #70ABD5;padding:2px;font-size:12px;color:#333;margin:0 0 10px}
+.paratable th,.paratable td{padding:0 5px;border:1px solid #B1C2CA;margin:1px;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word}
+.paratable th{background-color:#fff;line-height:200%;}
+.paratable td{background-color:#F6F9FB;vertical-align:top;line-height:200%;}
+.paratable th.new,.paratable td.new{background-image:url(http://mat1.gtimg.com/app/opent/images/wiki/resource/new.gif);background-position:98% 50%;background-repeat:no-repeat}
+.paratable th a,.paratable td a{color:#366799;text-decoration:none}
