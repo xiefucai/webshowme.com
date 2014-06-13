@@ -4,7 +4,7 @@ include "smtp.class.php";
 $smtpserver = "smtp.qq.com";//smtp服务器  你懂的
 $port=25; //端口
 $smtpuser = "421632997@qq.com";
-$smtppwd = "laozi12345"; //您登录smtp服务器的密码
+$smtppwd = "********"; //您登录smtp服务器的密码
 $mailtype = "HTML"; //邮件的类型，可选值是 TXT 或 HTML ,TXT 表示是纯文本的邮件,HTML 表示是 html格式的邮件
 $sendername = "421632997";//发件人名称
 $sender = "421632997@qq.com"; //发件人,一般要与您登录smtp服务器的用户名($smtpuser)相同,否则可能会因为smtp服务器的设置导致发送失败
